@@ -1,7 +1,14 @@
 #version 330 core
 
-layout(location=0) out vec4 color;
+layout(location=0)out vec4 color;
 
-void main() {
-    color = vec4(1.0, 0.0, 0.0, 1.0);
+in vec4 pos;
+
+void main(){
+    color=vec4(
+        pos[1]+.5,
+        pos[0]+.5,
+        -pos[0]+.5,
+        1
+    );
 }
