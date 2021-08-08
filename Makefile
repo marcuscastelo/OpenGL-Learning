@@ -1,0 +1,11 @@
+
+CXX=g++
+CPP_STANDARD=c++17
+CXXFLAGS=-std=${CPP_STANDARD}
+LDFLAGS=
+LDLIBS=
+
+
+
+main: main.cpp
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) -o $@ $<
