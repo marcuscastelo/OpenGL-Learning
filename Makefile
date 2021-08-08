@@ -2,9 +2,9 @@
 CXX=g++
 CPP_STANDARD=c++17
 CXXFLAGS=-std=${CPP_STANDARD}
-LDFLAGS=-Ldependencies/glfw/build/src
-LDLIBS=-pthread -ldl -lglfw3 -lGL
-INCLUDES=-Idependencies/glfw/include
+LDFLAGS=-Ldependencies/glfw/build/src -Idependencies/glew/lib
+LDLIBS=-pthread -ldl -lglfw3 -lGLEW -lGL  
+INCLUDES=-Idependencies/glfw/include -Idependencies/glew/include
 
 all: main
 
