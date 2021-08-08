@@ -1,5 +1,32 @@
-int main(int argc, char const *argv[])
+#include <GLFW/glfw3.h>
+#include <iostream>
+
+int main()
 {
-    /* code */
+    GLFWwindow *window;
+
+    if (!glfwInit())
+        return -1;
+
+    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    if (!window)
+    {
+        glfwTerminate();
+        return -1;
+    }
+
+    glfwMakeContextCurrent(window);
+
+    while (!glfwWindowShouldClose(window))
+    {
+        // glClear(GL_COLOR_BUFFER_BIT);
+        glfwPollEvents();
+        glfwSwapBuffers(window);
+    }
+
+    glfwDestroyWindow(window);
+
+    glfwTerminate();
+
     return 0;
 }
