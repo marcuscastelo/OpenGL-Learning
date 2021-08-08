@@ -3,7 +3,7 @@ CXX=g++
 CPP_STANDARD=c++17
 CXXFLAGS=-std=${CPP_STANDARD}
 LDFLAGS=-Ldependencies/glfw/build/src
-LDLIBS=-pthread -ldl -lglfw3
+LDLIBS=-pthread -ldl -lglfw3 -lGL
 INCLUDES=-Idependencies/glfw/include
 
 all: main

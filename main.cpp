@@ -1,4 +1,5 @@
 #include <GLFW/glfw3.h>
+#include <GL/gl.h>
 #include <iostream>
 
 int main()
@@ -19,7 +20,8 @@ int main()
 
     while (!glfwWindowShouldClose(window))
     {
-        // glClear(GL_COLOR_BUFFER_BIT);
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
         glfwPollEvents();
         glfwSwapBuffers(window);
     }
