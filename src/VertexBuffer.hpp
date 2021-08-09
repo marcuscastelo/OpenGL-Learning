@@ -19,6 +19,11 @@ public:
         glBufferData(GL_ARRAY_BUFFER, size, data, usage);
     }
 
+    ~VertexBuffer(void)
+    {
+        glDeleteBuffers(1, &m_RendererID);
+    }
+
     void Bind(void) const
     {
         glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
@@ -27,11 +32,6 @@ public:
     void Unbind(void) const
     {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-    }
-
-    ~VertexBuffer(void)
-    {
-        glDeleteBuffers(1, &m_RendererID);
     }
 
 private:

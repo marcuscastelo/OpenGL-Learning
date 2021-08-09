@@ -99,9 +99,7 @@ int main()
     
     // --- Code related to vertex array object ---
 
-    uint32_t vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    VertexArray vao;
 
     // --- 
 
@@ -143,8 +141,10 @@ int main()
     //
     // Great stackoverflow answer about the pointer parameter:
     // https://stackoverflow.com/questions/16380005/opengl-3-4-glvertexattribpointer-stride-and-offset-miscalculation
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+    
+    VertexBufferLayout vboLayout;
+    vboLayout.Push<float>(2); // 2 floats for position
+    vao.AddVBO(vbo, vboLayout);
 
     // ---
 
@@ -187,11 +187,11 @@ int main()
     // But the ibo never get attached to the vao, so we willhaveneed to bind it again later 
     vbo.Unbind();
     ibo.Unbind();
-    glBindVertexArray(0);
+    vao.Unbind();
 
     // Binds the vao, which has reference to the vbo and it's layout
-    glBindVertexArray(vao);
-    ibo.Bind();
+    vao.Bind();
+    ibo.Bind(); // Binds the ibo, since it's not to the vao
 
     while (!glfwWindowShouldClose(window))
     {
