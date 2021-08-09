@@ -14,5 +14,5 @@ run: main
 .PHONY: main
 main: bin/main
 
-bin/main: src/main.cpp
-	$(CXX) $(CXXFLAGS) $< -o $@ $(LDFLAGS) $(LDLIBS) $(INCLUDES)  
+bin/main: src/main.cpp src/Shader.cpp
+	$(CXX) $(CXXFLAGS) $^ -o $@ $(LDFLAGS) $(LDLIBS) $(INCLUDES)  

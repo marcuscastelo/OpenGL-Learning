@@ -1,38 +1,61 @@
 #pragma once
 
+#include <GL/glew.h>
+
 #include <string>
+#include <iostream>
+
 using namespace std::string_literals;
 
-uint32_t compileShader(uint32_t type, const std::string &path)
+class Shader
 {
-    std::ifstream shaderSourceFile;
-    shaderSourceFile.open(path);
-    if (!shaderSourceFile)
-        throw std::runtime_error("Could not open "s + (type == GL_VERTEX_SHADER ? "vertex" : "fragment") + " shader file: "s + path);
-
-    std::stringstream ss;
-    while (ss << shaderSourceFile.rdbuf())
-        ;
-    std::string shaderSource = ss.str();
-
-    uint32_t shaderId = glCreateShader(type);
-    const char *source = shaderSource.c_str();
-    glShaderSource(shaderId, 1, &source, nullptr);
-    glCompileShader(shaderId);
-
-    int result;
-    glGetShaderiv(shaderId, GL_COMPILE_STATUS, &result);
-    if (result == GL_FALSE)
+public:
+    Shader(const std::string &vertexFilePath, const std::string &fragmentFilePath)
     {
-        int len;
-        glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &len);
-        char *message = (char *)alloca((len + 1) * sizeof(char));
-        glGetShaderInfoLog(shaderId, len, &len, message);
+        uint32_t vertexShaderID = CompileShader(GL_VERTEX_SHADER, vertexFilePath);
+        uint32_t fragmentShaderID = CompileShader(GL_FRAGMENT_SHADER, fragmentFilePath);
 
-        throw std::runtime_error("Could not compile "s + (type == GL_VERTEX_SHADER ? "vertex" : "fragment") + " shader: "s + path + ":\n"s + message);
+        m_RendererID = glCreateProgram();
+        glAttachShader(m_RendererID, vertexShaderID);
+        glAttachShader(m_RendererID, fragmentShaderID);
+        glLinkProgram(m_RendererID);
 
-        glDeleteShader(shaderId);
+        glValidateProgram(m_RendererID);
+
+        glDeleteShader(vertexShaderID);
+        glDeleteShader(fragmentShaderID);
     }
 
-    return shaderId;
-}
+    ~Shader()
+    {
+        glDeleteProgram(m_RendererID);
+    }
+
+    void Bind() const { glUseProgram(m_RendererID); }
+    void Unbind() const { glUseProgram(0); }
+
+    uint32_t GetUniformLocation(const std::string &uniformName) const
+    {
+        int32_t location = glGetUniformLocation(m_RendererID, uniformName.c_str());
+        if (location == -1)
+        {   
+            std::cout << "Uniform \"" << uniformName << "\" not found in shader" << std::endl;
+        }
+        return location;
+    }
+
+    template <typename ...T>
+    void SetUniform(uint32_t location, T ...values) const {
+        std::cerr << "Not implemented" << std::endl;
+    }
+
+    template <typename ...T>
+    void SetUniform(const std::string &uniformName, T ...values) const {
+        SetUniform(GetUniformLocation(uniformName), values...);
+    }
+
+private:
+    uint32_t CompileShader(uint32_t type, const std::string &path);
+
+    uint32_t m_RendererID;
+};
