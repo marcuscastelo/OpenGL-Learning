@@ -12,6 +12,13 @@
 
 using namespace std::string_literals;
 
+#ifdef __WIN32__
+#define DBG_BREAK() __debugbreak()
+#else
+#include <signal.h>
+#define DBG_BREAK() raise(SIGTRAP)
+#endif
+
 uint32_t createShaderProgram()
 {
     uint32_t program = glCreateProgram();
@@ -31,6 +38,27 @@ uint32_t createShaderProgram()
     return program;
 }
 
+void onError(int error, const char *description)
+{
+    std::cerr << "OpenGL Error: (" << error << ") " << description << std::endl;
+}
+
+void onOpenGLMessage(GLenum source,
+                     GLenum type,
+                     GLuint id,
+                     GLenum severity,
+                     GLsizei length,
+                     const GLchar *message,
+                     const void *userParam)
+{
+    fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+            (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
+            type, severity, message);
+
+    if (GL_DEBUG_TYPE_ERROR == type)
+        DBG_BREAK();
+}
+
 int main()
 {
     GLFWwindow *window;
@@ -40,6 +68,11 @@ int main()
         std::cerr << "Failed to initialize GLFW." << std::endl;
         return -1;
     }
+    glfwSetErrorCallback(onError);
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
     if (!window)
@@ -56,8 +89,18 @@ int main()
         return -1;
     }
 
-    std::cout << "OpenGL " << glGetString(GL_VERSION) << " GLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(onOpenGLMessage, NULL);
 
+    std::cout << "OpenGL " << glGetString(GL_VERSION) << " GLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+    
+    // --- Code related to vertex array object ---
+
+    uint32_t vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    // --- 
 
 
     // --- Code related to vertex buffer ---
@@ -75,10 +118,14 @@ int main()
     // Each vertex contains only it's position, so we will use a float array of size 8
     // ( 2 floats for position inside each vertex )
     std::array<float, 8> vertexData{
-        -0.5f, -0.5f, // First vertex (x, y)
-        0.5f, -0.5f,
-        0.5f, 0.5f,
-        -0.5f, 0.5f,
+        -0.5f,
+        -0.5f, // First vertex (x, y)
+        0.5f,
+        -0.5f,
+        0.5f,
+        0.5f,
+        -0.5f,
+        0.5f,
     };
 
     // Then we need to tell OpenGl that we want to use this vertex buffer.
@@ -107,8 +154,6 @@ int main()
 
     // ---
 
-
-
     // --- Code related to index buffer ---
 
     // Index buffer is a set of indices that are used
@@ -123,7 +168,7 @@ int main()
 
     // The triangles are drawn in the counter-clockwise order.
     std::array<uint32_t, 6> indices{
-        0, 1, 2, // First triangle 
+        0, 1, 2, // First triangle
         2, 3, 0  // Second triangle
     };
 
@@ -135,12 +180,10 @@ int main()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * indices.size(), indices.data(), GL_STATIC_DRAW);
 
     // Now there's no need to call glEnableVertexAttribArray(0) anymore, because this
-    // buffer is just a set of indices and does not contain any vertex data. 
+    // buffer is just a set of indices and does not contain any vertex data.
     // Thus, there are no attributes to enable.
 
     // ---
-
-
 
     // --- Code related to shader program ---
 
@@ -156,6 +199,13 @@ int main()
     float dr = 0.01f;
     float dg = 0.01f;
     float db = 0.01f;
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
     while (!glfwWindowShouldClose(window))
     {
