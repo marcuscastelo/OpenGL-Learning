@@ -9,6 +9,9 @@
 #include <array>
 
 #include "Shader.hpp"
+#include "VertexBuffer.hpp"
+#include "IndexBuffer.hpp"
+#include "VertexArray.hpp"
 
 using namespace std::string_literals;
 
@@ -105,14 +108,6 @@ int main()
 
     // --- Code related to vertex buffer ---
 
-    // Vertex buffer is a set of vertices that are passed to the shader in the form of different attributes glued together.
-    // That means a vertex buffer can be represented as folloiwng:
-    // vertexBuffer = [ vertex1, vertex2, vertex3, vertex4, ... ]
-    // where vertex1, vertex2, vertex3, vertex4 are the vertex data
-    // vertex_i can contain any data, from just coordinates, to texture coordinates, normals, colors, etc.
-    // but the data is all stored sequentially, without any structure.
-    uint32_t vbo; // Stands for Vertex Buffer Object
-    glGenBuffers(1, &vbo);
 
     // In this example, we will use a vertex buffer with 4 vertices.
     // Each vertex contains only it's position, so we will use a float array of size 8
@@ -128,12 +123,11 @@ int main()
         0.5f,
     };
 
+    VertexBuffer vbo(vertexData.data(), vertexData.size() * sizeof(float), GL_STATIC_DRAW);
+
     // Then we need to tell OpenGl that we want to use this vertex buffer.
     // GL_ARRAY_BUFFER means we are binding a vertex buffer.
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-    // Then, we tell OpenGl to copy the data from our array to the vertex buffer.
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertexData.size(), vertexData.data(), GL_STATIC_DRAW);
+    vbo.Bind();
 
     // As said before, all the data is sequential, so we need to specify two things:
     // 1 - What are the attributes of the vertex buffer (i.e. what values are stored in each vertex)
