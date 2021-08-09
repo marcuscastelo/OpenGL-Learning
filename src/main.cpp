@@ -150,28 +150,16 @@ int main()
 
     // --- Code related to index buffer ---
 
-    // Index buffer is a set of indices that are used
-    // to avoid the need of duplicating the vertices.
-    // In this example, we draw a square, so we need 4 vertices.
-    // But we can draw only triangles, so we would need 6 vertices. (2 triangles)
-    // Instead of duplicating the vertices, we can use the indices to specify
-    // which vertices to draw in each triangle.
-
-    uint32_t ibo; // Stands for Index Buffer Object
-    glGenBuffers(1, &ibo);
-
     // The triangles are drawn in the counter-clockwise order.
     std::array<uint32_t, 6> indices{
         0, 1, 2, // First triangle
         2, 3, 0  // Second triangle
     };
 
-    // GL_ELEMENT_ARRAY_BUFFER means we are binding an index buffer.
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    IndexBuffer ibo(indices.data(), indices.size(), GL_STATIC_DRAW);
 
-    // Then, we tell OpenGl to copy the data from our array to the index buffer.
-    // The same as before, we just copy the data from our array to the index buffer.
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * indices.size(), indices.data(), GL_STATIC_DRAW);
+    // GL_ELEMENT_ARRAY_BUFFER means we are binding an index buffer.
+    ibo.Bind();
 
     // Now there's no need to call glEnableVertexAttribArray(0) anymore, because this
     // buffer is just a set of indices and does not contain any vertex data.
@@ -194,12 +182,16 @@ int main()
     float dg = 0.01f;
     float db = 0.01f;
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    // Unbinding just for testing purposes, those lines are not required.
+    // The vbo got attached to the vao the time glVertexAttribPointer was called.
+    // But the ibo never get attached to the vao, so we willhaveneed to bind it again later 
+    vbo.Unbind();
+    ibo.Unbind();
     glBindVertexArray(0);
 
+    // Binds the vao, which has reference to the vbo and it's layout
     glBindVertexArray(vao);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    ibo.Bind();
 
     while (!glfwWindowShouldClose(window))
     {
@@ -210,12 +202,10 @@ int main()
         // Note: the vbo and ibo are already bound to opengl
         // so all the operations below refer to them.
 
-        // Deactivated: used to draw vertex without an index buffer
-        // glDrawArrays(GL_TRIANGLES, 0, 6);
-
         // Using a index buffer:
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+        // --- Code to animate the rectangle
         r += dr;
         g += dg;
         b += db;
@@ -228,6 +218,7 @@ int main()
 
         if (b > 1.0f || b < 0.25f)
             db *= -1.0f;
+        // ---
 
         glfwSwapBuffers(window);
 
