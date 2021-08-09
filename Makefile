@@ -14,5 +14,5 @@ run: main
 .PHONY: main
 main: bin/main
 
-bin/main: main.cpp
+bin/main: src/main.cpp
 	$(CXX) $(CXXFLAGS) $< -o $@ $(LDFLAGS) $(LDLIBS) $(INCLUDES)  
