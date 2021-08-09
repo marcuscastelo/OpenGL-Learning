@@ -4,6 +4,8 @@ layout(location=0)out vec4 color;
 
 in vec4 pos;
 
+uniform vec4 u_Color;
+
 void main(){
-    color=vec4(pos.x + 0.5,pos.y + 0.5,pos.z + 0.5,1.0);
+    color = u_Color * (1 - pow( (pos.x * pos.x + pos.y * pos.y) / 3, 0.2));
 }

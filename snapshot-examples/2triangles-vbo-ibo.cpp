@@ -8,9 +8,41 @@
 #include <stdexcept>
 #include <array>
 
-#include "Shader.hpp"
-
 using namespace std::string_literals;
+
+uint32_t compileShader(uint32_t type, const std::string &path)
+{
+    std::ifstream shaderSourceFile;
+    shaderSourceFile.open(path);
+    if (!shaderSourceFile)
+        throw std::runtime_error("Could not open "s + (type == GL_VERTEX_SHADER ? "vertex" : "fragment") + " shader file: "s + path);
+
+    std::stringstream ss;
+    while (ss << shaderSourceFile.rdbuf())
+        ;
+    std::string shaderSource = ss.str();
+
+    uint32_t shaderId = glCreateShader(type);
+    const char *source = shaderSource.c_str();
+    glShaderSource(shaderId, 1, &source, nullptr);
+    glCompileShader(shaderId);
+
+    int result;
+    glGetShaderiv(shaderId, GL_COMPILE_STATUS, &result);
+    if (result == GL_FALSE)
+    {
+        int len;
+        glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &len);
+        char *message = (char *)alloca((len + 1) * sizeof(char));
+        glGetShaderInfoLog(shaderId, len, &len, message);
+
+        throw std::runtime_error("Could not compile "s + (type == GL_VERTEX_SHADER ? "vertex" : "fragment") + " shader: "s + path + ":\n"s + message);
+
+        glDeleteShader(shaderId);
+    }
+
+    return shaderId;
+}
 
 uint32_t createShaderProgram()
 {
@@ -149,19 +181,11 @@ int main()
 
     // ---
 
-    uint32_t u_ColorLoc = glGetUniformLocation(shaderProgram, "u_Color");
-    float r = 1.0f;
-    float g = 0.6125f;
-    float b = 0.25f;
-    float dr = 0.01f;
-    float dg = 0.01f;
-    float db = 0.01f;
+
 
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT);
-
-        glUniform4f(u_ColorLoc, r, g, b, 1.0f);
 
         // Note: the vbo and ibo are already bound to opengl
         // so all the operations below refer to them.
@@ -171,19 +195,6 @@ int main()
 
         // Using a index buffer:
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-        r += dr;
-        g += dg;
-        b += db;
-
-        if (r > 1.0f || r < 0.25f)
-            dr *= -1.0f;
-
-        if (g > 1.0f || g < 0.25f)
-            dg *= -1.0f;
-
-        if (b > 1.0f || b < 0.25f)
-            db *= -1.0f;
 
         glfwSwapBuffers(window);
 
