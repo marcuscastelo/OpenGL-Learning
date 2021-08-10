@@ -4,6 +4,7 @@
 
 #include <string>
 #include <iostream>
+#include <unordered_map>
 
 using namespace std::string_literals;
 
@@ -36,11 +37,16 @@ public:
 
     int32_t GetUniformLocation(const std::string &uniformName) const
     {
+        auto it = m_UniformLocationCache.find(uniformName);
+        if (it != m_UniformLocationCache.end())
+            return it->second;
+
         int32_t location = glGetUniformLocation(m_RendererID, uniformName.c_str());
         if (location == -1)
         {
             std::cout << "Uniform \"" << uniformName << "\" not found in shader" << std::endl;
         }
+        m_UniformLocationCache[uniformName] = location;
         return location;
     }
 
@@ -59,5 +65,7 @@ public:
 private:
     uint32_t CompileShader(uint32_t type, const std::string &path);
 
+private:
     uint32_t m_RendererID;
+    mutable std::unordered_map<std::string, int32_t> m_UniformLocationCache;
 };

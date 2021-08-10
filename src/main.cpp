@@ -154,12 +154,10 @@ int main()
         // --- Code related to shader program ---
 
         Shader shaderProgram("res/shaders/vertex-shader.vs", "res/shaders/fragment-shader.fs");
-        int32_t u_ColorLoc = shaderProgram.GetUniformLocation("u_Color");
-        int32_t u_Texture = shaderProgram.GetUniformLocation("u_Texture");
-
         shaderProgram.Bind();
-        shaderProgram.SetUniform(u_ColorLoc, 1.0f, 0.0f, 0.0f, 1.0f);
-        shaderProgram.SetUniform(u_Texture, textureSlot);
+
+        shaderProgram.SetUniform("u_Color", 1.0f, 0.0f, 0.0f, 1.0f);
+        shaderProgram.SetUniform("u_Texture", textureSlot);
 
         // ---
 
@@ -183,7 +181,7 @@ int main()
             renderer.Clear();
 
             shaderProgram.Bind();
-            shaderProgram.SetUniform(u_ColorLoc, r, g, b, 1.0f);
+            shaderProgram.SetUniform("u_Color", r, g, b, 1.0f);
 
             renderer.Draw(vao, ibo, shaderProgram);
 
