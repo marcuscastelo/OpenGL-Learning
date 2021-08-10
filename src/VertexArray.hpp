@@ -19,11 +19,11 @@ public:
         glDeleteVertexArrays(1, &m_RendererID);
     }
 
-    void Bind() {
+    void Bind() const {
         glBindVertexArray(m_RendererID);
     }
 
-    void Unbind() {
+    void Unbind() const {
         glBindVertexArray(0);
     }
 
@@ -36,7 +36,7 @@ public:
         uint32_t offset = 0;
         for (size_t i = 0; i < elements.size(); ++i) {
             glEnableVertexAttribArray(i);
-            glVertexAttribPointer(i, elements[i].count, elements[i].type, elements[i].normalized, layout.GetStride(), (const void*) offset);
+            glVertexAttribPointer(i, elements[i].count, elements[i].type, elements[i].normalized, layout.GetStride(), (const void*) (int*) offset);
             offset += elements[i].count * VertexBufferLayoutElement::GetSize(elements[i].type);
         }
     }

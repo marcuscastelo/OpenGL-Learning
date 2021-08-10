@@ -12,6 +12,7 @@
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
 #include "VertexArray.hpp"
+#include "Renderer.hpp"
 
 using namespace std::string_literals;
 
@@ -166,21 +167,16 @@ int main()
         vbo.Unbind();
         ibo.Unbind();
         vao.Unbind();
-
       
-
+        Renderer renderer;
         while (!glfwWindowShouldClose(window))
         {
-            glClear(GL_COLOR_BUFFER_BIT);
-
-
-            // Binds the vao, which has reference to the vbo and it's layout
-            vao.Bind();
-            ibo.Bind(); // Binds the ibo, since it's not to the vao
-
+            renderer.Clear();
 
             shaderProgram.Bind();
             glUniform4f(u_ColorLoc, r, g, b, 1.0f);
+            
+            renderer.Draw(vao, ibo, shaderProgram);
 
             // Note: the vbo and ibo are already bound to opengl
             // so all the operations below refer to them.
