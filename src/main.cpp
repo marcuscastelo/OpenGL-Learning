@@ -13,6 +13,7 @@
 #include "IndexBuffer.hpp"
 #include "VertexArray.hpp"
 #include "Renderer.hpp"
+#include "Texture.hpp"
 
 using namespace std::string_literals;
 
@@ -88,17 +89,13 @@ int main()
         // --- Code related to vertex buffer ---
 
         // In this example, we will use a vertex buffer with 4 vertices.
-        // Each vertex contains only it's position, so we will use a float array of size 8
-        // ( 2 floats for position inside each vertex )
-        std::array<float, 8> vertexData{
-            -0.5f,
-            -0.5f, // First vertex (x, y)
-            0.5f,
-            -0.5f,
-            0.5f,
-            0.5f,
-            -0.5f,
-            0.5f,
+        // Each vertex contains it's position and texure coords, so we will use a float array of size 16
+        // ( 2 floats for position and 2 for texture coords inside each vertex )
+        std::array<float, 4 * (2 + 2)> vertexData{
+            -0.5f, -0.5f, 0.0f, 0.0f, // First vertex (x, y, s, t)
+            0.5f, -0.5f, 1.0, 0.0,
+            0.5f, 0.5f, 1.0, 1.0,
+            -0.5f, 0.5f, 0.0, 1.0
         };
 
         VertexBuffer vbo(vertexData.data(), vertexData.size() * sizeof(float), GL_STATIC_DRAW);
@@ -124,6 +121,7 @@ int main()
 
         VertexBufferLayout vboLayout;
         vboLayout.Push<float>(2); // 2 floats for position
+        vboLayout.Push<float>(2); // 2 floats for texture coords
         vao.AddVBO(vbo, vboLayout);
 
         // ---
@@ -147,16 +145,27 @@ int main()
 
         // ---
 
+        // --- Code related to texture ---
+        Texture texture("res/textures/minecraft.png");
+        uint32_t textureSlot = 0;
+        texture.Bind(textureSlot);
+        // ---
+
         // --- Code related to shader program ---
 
-        Shader shaderProgram("shaders/vertex-shader.vs", "shaders/fragment-shader.fs");
+        Shader shaderProgram("res/shaders/vertex-shader.vs", "res/shaders/fragment-shader.fs");
+        int32_t u_ColorLoc = shaderProgram.GetUniformLocation("u_Color");
+        int32_t u_Texture = shaderProgram.GetUniformLocation("u_Texture");
+
+        shaderProgram.Bind();
+        shaderProgram.SetUniform(u_ColorLoc, 1.0f, 0.0f, 0.0f, 1.0f);
+        shaderProgram.SetUniform(u_Texture, textureSlot);
 
         // ---
 
-        uint32_t u_ColorLoc = shaderProgram.GetUniformLocation("u_Color");
         float r = 1.0f;
-        float g = 0.6125f;
-        float b = 0.25f;
+        float g = 1.0f;
+        float b = 1.0f;
         float dr = 0.01f;
         float dg = 0.01f;
         float db = 0.01f;
@@ -174,8 +183,8 @@ int main()
             renderer.Clear();
 
             shaderProgram.Bind();
-            glUniform4f(u_ColorLoc, r, g, b, 1.0f);
-            
+            shaderProgram.SetUniform(u_ColorLoc, r, g, b, 1.0f);
+
             renderer.Draw(vao, ibo, shaderProgram);
 
             // Note: the vbo and ibo are already bound to opengl

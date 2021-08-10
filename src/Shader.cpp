@@ -40,3 +40,21 @@ uint32_t Shader::CompileShader(uint32_t type, const std::string &path)
 
     return shaderId;
 }
+
+template <>
+void Shader::SetUniform<float, float, float, float>(int32_t location, float v0, float v1, float v2, float v3) const
+{
+    glUniform4f(location, v0, v1, v2, v3);
+}
+
+template <>
+void Shader::SetUniform<int>(int32_t location, int v) const
+{
+    glUniform1i(location, v);
+}
+
+template<>
+void Shader::SetUniform<float>(int32_t location, float v) const
+{
+    glUniform1f(location, v);
+}

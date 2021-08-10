@@ -14,5 +14,5 @@ run: main
 .PHONY: main
 main: bin/main
 
-bin/main: src/main.cpp src/Shader.cpp
+bin/main: src/main.cpp src/Shader.cpp src/vendor/stb_image/stb_image.cpp
 	$(CXX) $(CXXFLAGS) $^ -o $@ $(LDFLAGS) $(LDLIBS) $(INCLUDES)  

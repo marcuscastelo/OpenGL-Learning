@@ -34,23 +34,25 @@ public:
     void Bind() const { glUseProgram(m_RendererID); }
     void Unbind() const { glUseProgram(0); }
 
-    uint32_t GetUniformLocation(const std::string &uniformName) const
+    int32_t GetUniformLocation(const std::string &uniformName) const
     {
         int32_t location = glGetUniformLocation(m_RendererID, uniformName.c_str());
         if (location == -1)
-        {   
+        {
             std::cout << "Uniform \"" << uniformName << "\" not found in shader" << std::endl;
         }
         return location;
     }
 
-    template <typename ...T>
-    void SetUniform(uint32_t location, T ...values) const {
+    template <typename... T>
+    void SetUniform(int32_t location, T... values) const
+    {
         std::cerr << "Not implemented" << std::endl;
     }
 
-    template <typename ...T>
-    void SetUniform(const std::string &uniformName, T ...values) const {
+    template <typename... T>
+    void SetUniform(const std::string &uniformName, T... values) const
+    {
         SetUniform(GetUniformLocation(uniformName), values...);
     }
 
